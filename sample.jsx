@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Table, Button, TextInput, Paper, Modal } from "@mantine/core";
 import { useFetchData } from "../../hooks/useFetchData";
@@ -18,10 +17,12 @@ export const EditableTable = () => {
   }, [fetchedData]);
 
   const handleChange = (value, field, index) => {
-    setEditedData((prevEditedData) => ({
-      ...prevEditedData,
-      [index]: { ...prevEditedData[index], [field]: value },
-    }));
+    if (isEditableCell(field)) { // 編集可能なセルのフィールドかどうかをチェック
+      setEditedData({
+        ...editedData,
+        [index]: { ...editedData[index], [field]: value },
+      });
+    }
   };
 
   const handleFilterChange = (value, field) => {
@@ -55,7 +56,7 @@ export const EditableTable = () => {
     setUpdatedRow(null);
   };
 
-  const handleUpdate = (index) => {
+  const handleUpdate = async (index) => {
     setUpdatedRow({
       ...fetchedData[index],
       ...editedData[index],
@@ -91,10 +92,14 @@ export const EditableTable = () => {
   };
 
   useEffect(() => {
-    if (editedData && editedData[updatedRow?.index]) {
+    if (updatedRow) {
       setUpdatedRow(null);
     }
-  }, [editedData, updatedRow]);
+  }, [editedData]);
+
+  const isEditableCell = (field) => {
+    return field === FIELD_NAMES.CRM_PLANT_ID || field === FIELD_NAMES.CRM_UNIT_ID;
+  };
 
   if (error) {
     return <p>Error: {error}</p>;
@@ -122,20 +127,25 @@ export const EditableTable = () => {
             <tr key={index}>
               {Object.values(FIELD_NAMES).map((fieldName) => (
                 <td key={fieldName}>
-                  <TextInput
-                    value={
-                      editedData[index]?.[fieldName] || row[fieldName] || ""
-                    }
-                    onChange={(event) =>
-                      handleChange(event.target.value, fieldName, index)
-                    }
-                  />
+                  {isEditableCell(fieldName) ? ( // 編集可能なセルの場合のみ編集用の TextInput を表示
+                    <TextInput
+                      value={
+                        editedData[index]?.[fieldName] || row[fieldName] || ""
+                      }
+                      onChange={(event) =>
+                        handleChange(event.target.value, fieldName, index)
+                      }
+                    />
+                  ) : (
+                    // 編集不可なセルの場合はテキストの表示のみ
+                    <span>{row[fieldName]}</span>
+                  )}
                 </td>
               ))}
               <td>
                 <Button
                   onClick={() => handleUpdate(index)}
-                  disabled={updatedRow?.index !== index} // 更新がある行のみボタンを有効にする
+                  disabled={!updatedRow || updatedRow.index !== index} // 更新がある行のみボタンを有効にする
                 >
                   Update
                 </Button>
