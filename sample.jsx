@@ -95,64 +95,59 @@ export const EditableTable = () => {
 
   return (
     <>
-    
-    <Table>
-  <thead>
-    <tr>
-      {Object.values(FIELD_NAMES).map((fieldName) => (
-        <th 
-          key={fieldName} 
-          className="sticky top-0 bg-blue-200 z-10 border border-gray-300"
-        >
-          {fieldName}
-          <TextInput
-            onChange={(event) =>
-              handleFilterChange(event.target.value, fieldName)
-            }
-          />
-        </th>
-      ))}
-    </tr>
-  </thead>
-  <tbody>
-    {filteredData.map((row, index) => (
-      <tr 
-        key={index}
-        className={index % 2 === 0 ? 'bg-gray-200' : ''}
-      >
-        {Object.values(FIELD_NAMES).map((fieldName) => (
-          <td 
-            key={fieldName} 
-            className="border border-gray-300"
-          >
-            {(fieldName === 'CRM_PLANT_ID' || fieldName === 'CRM_UNIT_ID') ? (
-              <TextInput
-                value={
-                  editedData[index]?.[fieldName] || row[fieldName] || ""
-                }
-                onChange={(event) =>
-                  handleChange(event.target.value, fieldName, index)
-                }
-              />
-            ) : (
-              <span>{row[fieldName] || ""}</span>
-            )}
-          </td>
-        ))}
-        <td>
-          <Button
-            onClick={() => handleUpdate(index)}
-            disabled={!editedData[index] || Object.keys(editedData[index]).length === 0}
-          >
-            Update
-          </Button>
-        </td>
-      </tr>
-    ))}
-  </tbody>
-</Table>
-
-    
+      <Table>
+        <thead>
+          <tr>
+            {Object.values(FIELD_NAMES).map((fieldName) => (
+              <th key={fieldName} className="sticky top-0 z-10 ">
+                {fieldName}
+                <TextInput
+                  onChange={(event) =>
+                    handleFilterChange(event.target.value, fieldName)
+                  }
+                />
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {filteredData.map((row, index) => (
+            <tr
+              key={index}
+              className={index % 2 === 0 ? "bg-gray-200" : "bg-gray-100"}
+            >
+              {Object.values(FIELD_NAMES).map((fieldName) => (
+                <td key={fieldName} className="border border-gray-300">
+                  {fieldName === "CRM_PLANT_ID" ||
+                  fieldName === "CRM_UNIT_ID" ? (
+                    <TextInput
+                      value={
+                        editedData[index]?.[fieldName] || row[fieldName] || ""
+                      }
+                      onChange={(event) =>
+                        handleChange(event.target.value, fieldName, index)
+                      }
+                    />
+                  ) : (
+                    <span>{row[fieldName] || ""}</span>
+                  )}
+                </td>
+              ))}
+              <td>
+                <Button
+                  onClick={() => handleUpdate(index)}
+                  disabled={
+                    !editedData[index] ||
+                    Object.keys(editedData[index]).length === 0
+                  }
+                >
+                  Update
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
 
       <Modal opened={updateModalOpen} onClose={handleUpdateModalClose}>
         <Paper padding="md">
