@@ -1,32 +1,3 @@
-// hooks/useFetchData.js
-import { useState, useEffect } from "react";
-
-export const useFetchData = () => {
-  const [fetcheddata, setFetchedData] = useState([]);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetch(process.env.NEXT_PUBLIC_API_ENDPOINT)
-      .then((response) => response.json())
-      .then((data) => setData(data))
-      .catch((error) => setError(error.toString()));
-  }, []);
-
-  return { fetchedData, error };
-};
-
-// constants/fieldNames.js
-export const FIELD_NAMES = {
-  PLANTADDRESS1: "PLANTADDRESS1",
-  FRAME: "FRAME",
-  PLANTNAME: "PLANTNAME",
-  UNITNAME: "UNITNAME",
-  SUBNAME: "SUBNAME",
-  MACHINESN: "MACHINESN",
-  CRM_PLANT_ID: "CRM_PLANT_ID",
-  CRM_UNIT_ID: "CRM_UNIT_ID",
-};
-
 // components/EditableTable.js
 import React, { useState, useEffect } from "react";
 import { Table, Button, TextInput, Paper, Modal } from "@mantine/core";
