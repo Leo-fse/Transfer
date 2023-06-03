@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Table, Button, TextInput, Paper, Modal } from "@mantine/core";
 import { useFetchData } from "../../hooks/useFetchData";
 import { FIELD_NAMES } from "../../constants/fieldNames";
-import _ from 'lodash';
+import _ from "lodash";
 
 export const EditableTable = () => {
   const { fetchedData, error } = useFetchData();
@@ -147,7 +147,7 @@ export const EditableTable = () => {
                 <Button
                   onClick={() => handleUpdate(index)}
                   disabled={
-                    _.isEqual(row, editedData[index] || {})
+                    !editedData[index] || _.isEqual(row, editedData[index])
                   }
                 >
                   Update
