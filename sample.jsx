@@ -9,6 +9,7 @@ function EditableTable() {
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [bulkUpdateModalOpen, setBulkUpdateModalOpen] = useState(false);
   const [updatedRow, setUpdatedRow] = useState(null);
+  const [updatedRows, setUpdatedRows] = useState([]);
 
   useEffect(() => {
     fetch(process.env.NEXT_PUBLIC_API_ENDPOINT) 
@@ -69,11 +70,11 @@ function EditableTable() {
     });
 
     if (response.ok) {
-      setData(
-        data.map((item, i) =>
-          i === updatedRow.index ? { ...item, ...editedData[updatedRow.index] } : item
-        )
+      const updatedData = data.map((item, i) =>
+        i === updatedRow.index ? { ...item, ...editedData[updatedRow.index] } : item
       );
+      setData(updatedData);
+      setUpdatedRows([...updatedRows, updatedRow.index]);
     } else {
       console.error('Update failed');
     }
@@ -97,10 +98,10 @@ function EditableTable() {
 
     if (response.ok) {
       setData(updatedData);
+      setUpdatedRows(Object.keys(editedData).map(Number));
     } else {
       console.error('Bulk update failed');
     }
-
     handleBulkUpdateModalClose();
   };
 
@@ -111,66 +112,68 @@ function EditableTable() {
           <tr>
             <th>
               PLANTADDRESS1
-              <TextInput onChange={(value) => handleFilterChange(value, 'PLANTADDRESS1')} />
+              <TextInput onChange={(value) => handleFilterChange(value, 'plantAddress1')} />
             </th>
             <th>
               FRAME
-              <TextInput onChange={(value) => handleFilterChange(value, 'FRAME')} />
+              <TextInput onChange={(value) => handleFilterChange(value, 'frame')} />
             </th>
             <th>
               PLANTNAME
-              <TextInput onChange={(value) => handleFilterChange(value, 'PLANTNAME')} />
+              <TextInput onChange={(value) => handleFilterChange(value, 'plantName')} />
             </th>
             <th>
               UNITNAME
-              <TextInput onChange={(value) => handleFilterChange(value, 'UNITNAME')} />
+              <TextInput onChange={(value) => handleFilterChange(value, 'unitName')} />
             </th>
             <th>
               SUBNAME
-              <TextInput onChange={(value) => handleFilterChange(value, 'SUBNAME')} />
+              <TextInput onChange={(value) => handleFilterChange(value, 'subName')} />
             </th>
             <th>
               MACHINESN
-              <TextInput onChange={(value) => handleFilterChange(value, 'MACHINESN')} />
+              <TextInput onChange={(value) => handleFilterChange(value, 'machineSN')} />
             </th>
             <th>
               CRM_PLANT_ID
-              <TextInput onChange={(value) => handleFilterChange(value, 'CRM_PLANT_ID')} />
+              <TextInput onChange={(value) => handleFilterChange(value, 'plantID')} />
             </th>
             <th>
               CRM_UNIT_ID
-              <TextInput onChange={(value) => handleFilterChange(value, 'CRM_UNIT_ID')} />
+              <TextInput onChange={(value) => handleFilterChange(value, 'unitID')} />
             </th>
-            <th>Update</th>
+            <th>
+              Update
+            </th>
           </tr>
         </thead>
         <tbody>
-          {filteredData.map((row, i) => (
-            <tr key={i} style={editedData[i] ? { backgroundColor: 'yellow' } : {}}>
-              <td>{row.PLANTADDRESS1}</td>
-              <td>{row.FRAME}</td>
-              <td>{row.PLANTNAME}</td>
-              <td>{row.UNITNAME}</td>
-              <td>{row.SUBNAME}</td>
-              <td>{row.MACHINESN}</td>
+          {filteredData.map((row, index) => (
+            <tr key={index} style={editedData[index] ? { backgroundColor: 'yellow' } : undefined}>
+              <td>{row.plantAddress1}</td>
+              <td>{row.frame}</td>
+              <td>{row.plantName}</td>
+              <td>{row.unitName}</td>
+              <td>{row.subName}</td>
+              <td>{row.machineSN}</td>
               <td>
-                <TextInput
-                  value={editedData[i]?.CRM_PLANT_ID || row.CRM_PLANT_ID}
-                  onChange={(value) => handleChange(value, 'CRM_PLANT_ID', i)}
+                <TextInput 
+                  value={editedData[index]?.plantID ?? row.plantID ?? ''}
                   maxLength={10}
+                  onChange={(value) => handleChange(value, 'plantID', index)}
                 />
               </td>
               <td>
-                <TextInput
-                  value={editedData[i]?.CRM_UNIT_ID || row.CRM_UNIT_ID}
-                  onChange={(value) => handleChange(value, 'CRM_UNIT_ID', i)}
+                <TextInput 
+                  value={editedData[index]?.unitID ?? row.unitID ?? ''}
                   maxLength={10}
+                  onChange={(value) => handleChange(value, 'unitID', index)}
                 />
               </td>
               <td>
                 <Button
-                  onClick={() => handleUpdate(i)}
-                  disabled={!(editedData[i] && (editedData[i]?.CRM_PLANT_ID !== row.CRM_PLANT_ID || editedData[i]?.CRM_UNIT_ID !== row.CRM_UNIT_ID))}
+                  onClick={() => handleUpdate(index)}
+                  disabled={!(editedData[index] && !updatedRows.includes(index))}
                 >
                   Update
                 </Button>
@@ -179,26 +182,22 @@ function EditableTable() {
           ))}
         </tbody>
       </Table>
-      <Button onClick={handleBulkUpdate} disabled={!Object.keys(editedData).length}>Bulk Update</Button>
-
-      <Modal
-        opened={updateModalOpen}
-        onClose={handleUpdateModalClose}
-        title="Confirm Update"
-      >
-        <p>Are you sure you want to update this row?</p>
-        <Button onClick={handleConfirmedUpdate}>Yes</Button>
-        <Button onClick={handleUpdateModalClose}>No</Button>
+      <Button onClick={handleBulkUpdate} disabled={!Object.keys(editedData).length}>
+        Bulk update
+      </Button>
+      <Modal opened={updateModalOpen} onClose={handleUpdateModalClose}>
+        <Paper padding="md">
+          <h1>Update Confirmation</h1>
+          <p>Are you sure you want to update this row?</p>
+          <Button onClick={handleConfirmedUpdate}>Yes, update</Button>
+        </Paper>
       </Modal>
-
-      <Modal
-        opened={bulkUpdateModalOpen}
-        onClose={handleBulkUpdateModalClose}
-        title="Confirm Bulk Update"
-      >
-        <p>Are you sure you want to update all edited rows?</p>
-        <Button onClick={handleConfirmedBulkUpdate}>Yes</Button>
-        <Button onClick={handleBulkUpdateModalClose}>No</Button>
+      <Modal opened={bulkUpdateModalOpen} onClose={handleBulkUpdateModalClose}>
+        <Paper padding="md">
+          <h1>Bulk Update Confirmation</h1>
+          <p>Are you sure you want to update these rows?</p>
+          <Button onClick={handleConfirmedBulkUpdate}>Yes, update</Button>
+        </Paper>
       </Modal>
     </>
   );
