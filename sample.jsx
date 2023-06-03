@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, TextInput, Modal } from '@mantine/core';
+import { Table, Button, TextInput, Paper, Modal } from '@mantine/core';
 import 'tailwindcss/tailwind.css';
 
 function EditableTable() {
@@ -11,7 +11,7 @@ function EditableTable() {
   const [updatedRow, setUpdatedRow] = useState(null);
 
   useEffect(() => {
-    fetch(process.env.REACT_APP_API_ENDPOINT) 
+    fetch(process.env.NEXT_PUBLIC_API_ENDPOINT) 
       .then(response => response.json())
       .then(data => setData(data))
       .catch(error => console.error('Error:', error));
@@ -60,7 +60,7 @@ function EditableTable() {
       console.error('Update failed: No row to update');
       return;
     }
-    const response = await fetch(process.env.REACT_APP_UPDATE_ENDPOINT, {
+    const response = await fetch(process.env.NEXT_PUBLIC_API_UPDATE_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ function EditableTable() {
   const handleConfirmedBulkUpdate = async () => {
     const updatedData = data.map((item, i) => editedData[i] ? { ...item, ...editedData[i] } : item);
 
-    const response = await fetch(process.env.REACT_APP_BULK_UPDATE_ENDPOINT, {
+    const response = await fetch(process.env.NEXT_PUBLIC_API_BULK_UPDATE_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -100,51 +100,77 @@ function EditableTable() {
     } else {
       console.error('Bulk update failed');
     }
+
     handleBulkUpdateModalClose();
   };
 
   return (
-    <div className="App">
-      <h1>Editable Table</h1>
-      <Button onClick={handleBulkUpdate}>Bulk Update</Button>
+    <>
       <Table>
         <thead>
           <tr>
-            {["PLANTADDRESS1", "FRAME", "PLANTNAME", "UNITNAME", "SUBNAME", "MACHINESN", "CRM_PLANT_ID", "CRM_UNIT_ID"].map((colName) => (
-              <th key={colName}>
-                {colName}
-                <TextInput
-                  placeholder={`Filter ${colName}`}
-                  onChange={(value) => handleFilterChange(value, colName)}
-                  style={{ width: '100%' }}
-                />
-              </th>
-            ))}
-            <th>Action</th>
+            <th>
+              PLANTADDRESS1
+              <TextInput onChange={(value) => handleFilterChange(value, 'PLANTADDRESS1')} />
+            </th>
+            <th>
+              FRAME
+              <TextInput onChange={(value) => handleFilterChange(value, 'FRAME')} />
+            </th>
+            <th>
+              PLANTNAME
+              <TextInput onChange={(value) => handleFilterChange(value, 'PLANTNAME')} />
+            </th>
+            <th>
+              UNITNAME
+              <TextInput onChange={(value) => handleFilterChange(value, 'UNITNAME')} />
+            </th>
+            <th>
+              SUBNAME
+              <TextInput onChange={(value) => handleFilterChange(value, 'SUBNAME')} />
+            </th>
+            <th>
+              MACHINESN
+              <TextInput onChange={(value) => handleFilterChange(value, 'MACHINESN')} />
+            </th>
+            <th>
+              CRM_PLANT_ID
+              <TextInput onChange={(value) => handleFilterChange(value, 'CRM_PLANT_ID')} />
+            </th>
+            <th>
+              CRM_UNIT_ID
+              <TextInput onChange={(value) => handleFilterChange(value, 'CRM_UNIT_ID')} />
+            </th>
+            <th>Update</th>
           </tr>
         </thead>
         <tbody>
-          {filteredData.map((row, index) => (
-            <tr key={index} style={editedData[index] ? { backgroundColor: '#FFD700' } : {}}>
-              {Object.keys(row).map((key, i) => {
-                if (key !== "CRM_PLANT_ID" && key !== "CRM_UNIT_ID") {
-                  return <td key={i}>{row[key]}</td>;
-                }
-                return (
-                  <td key={i}>
-                    <TextInput
-                      value={editedData[index] && editedData[index][key] ? editedData[index][key] : row[key]}
-                      onChange={(value) => handleChange(value, key, index)}
-                      maxLength={10}
-                      disabled={key === "CRM_PLANT_ID" || key === "CRM_UNIT_ID" ? false : true}
-                    />
-                  </td>
-                );
-              })}
+          {filteredData.map((row, i) => (
+            <tr key={i} style={editedData[i] ? { backgroundColor: 'yellow' } : {}}>
+              <td>{row.PLANTADDRESS1}</td>
+              <td>{row.FRAME}</td>
+              <td>{row.PLANTNAME}</td>
+              <td>{row.UNITNAME}</td>
+              <td>{row.SUBNAME}</td>
+              <td>{row.MACHINESN}</td>
+              <td>
+                <TextInput
+                  value={editedData[i]?.CRM_PLANT_ID || row.CRM_PLANT_ID}
+                  onChange={(value) => handleChange(value, 'CRM_PLANT_ID', i)}
+                  maxLength={10}
+                />
+              </td>
+              <td>
+                <TextInput
+                  value={editedData[i]?.CRM_UNIT_ID || row.CRM_UNIT_ID}
+                  onChange={(value) => handleChange(value, 'CRM_UNIT_ID', i)}
+                  maxLength={10}
+                />
+              </td>
               <td>
                 <Button
-                  onClick={() => handleUpdate(index)}
-                  disabled={!editedData[index] || (editedData[index] && !Object.keys(editedData[index]).length)}
+                  onClick={() => handleUpdate(i)}
+                  disabled={!(editedData[i] && (editedData[i]?.CRM_PLANT_ID !== row.CRM_PLANT_ID || editedData[i]?.CRM_UNIT_ID !== row.CRM_UNIT_ID))}
                 >
                   Update
                 </Button>
@@ -153,21 +179,28 @@ function EditableTable() {
           ))}
         </tbody>
       </Table>
-      {updateModalOpen && (
-        <Modal opened={updateModalOpen} onClose={handleUpdateModalClose} title="Update Confirmation">
-          <p>Are you sure you want to update the row?</p>
-          <Button onClick={handleConfirmedUpdate}>Yes</Button>
-          <Button onClick={handleUpdateModalClose}>No</Button>
-        </Modal>
-      )}
-      {bulkUpdateModalOpen && (
-        <Modal opened={bulkUpdateModalOpen} onClose={handleBulkUpdateModalClose} title="Bulk Update Confirmation">
-          <p>Are you sure you want to bulk update the table?</p>
-          <Button onClick={handleConfirmedBulkUpdate}>Yes</Button>
-          <Button onClick={handleBulkUpdateModalClose}>No</Button>
-        </Modal>
-      )}
-    </div>
+      <Button onClick={handleBulkUpdate} disabled={!Object.keys(editedData).length}>Bulk Update</Button>
+
+      <Modal
+        opened={updateModalOpen}
+        onClose={handleUpdateModalClose}
+        title="Confirm Update"
+      >
+        <p>Are you sure you want to update this row?</p>
+        <Button onClick={handleConfirmedUpdate}>Yes</Button>
+        <Button onClick={handleUpdateModalClose}>No</Button>
+      </Modal>
+
+      <Modal
+        opened={bulkUpdateModalOpen}
+        onClose={handleBulkUpdateModalClose}
+        title="Confirm Bulk Update"
+      >
+        <p>Are you sure you want to update all edited rows?</p>
+        <Button onClick={handleConfirmedBulkUpdate}>Yes</Button>
+        <Button onClick={handleBulkUpdateModalClose}>No</Button>
+      </Modal>
+    </>
   );
 }
 
