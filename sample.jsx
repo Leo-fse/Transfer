@@ -192,7 +192,9 @@ export const EditableTable = () => {
               {Object.values(FIELD_NAMES).map((fieldName) => (
                 <td key={fieldName}>
                   <TextInput
-                    value={editedData[index]?.[fieldName] || row[fieldName]}
+                    value={
+                      editedData[index]?.[fieldName] || row[fieldName] || ""
+                    }
                     onChange={(event) =>
                       handleChange(event.target.value, fieldName, index)
                     }
