@@ -37,8 +37,6 @@ const editableFields = [FIELD_NAMES.CRM_PLANT_ID, FIELD_NAMES.CRM_UNIT_ID];
 
 // components/EditableTable.js
 
-// ...import文
-
 export const EditableTable = () => {
   const { fetchedData, error } = useFetchData();
   const [data, setData] = useState([]);
@@ -97,11 +95,14 @@ export const EditableTable = () => {
   };
 
   const handleUpdate = async (index) => {
-    setUpdatedRow({
-      ...fetchedData[index],
-      ...editedData[index],
-      index: index,
-    });
+    const editedRow = editedData[index];
+    if (!editedRow || Object.keys(editedRow).length === 0) {
+      console.error("Update failed: No changes made");
+      return;
+    }
+
+    const updatedRow = { ...fetchedData[index], ...editedRow, index: index };
+    setUpdatedRow(updatedRow);
     setUpdateModalOpen(true);
   };
 
@@ -110,6 +111,7 @@ export const EditableTable = () => {
       console.error("Update failed: No row to update");
       return;
     }
+
     const response = await fetch(process.env.NEXT_PUBLIC_API_UPDATE_ENDPOINT, {
       method: "POST",
       headers: {
@@ -120,9 +122,7 @@ export const EditableTable = () => {
 
     if (response.ok) {
       const updatedData = fetchedData.map((row, index) =>
-        index === updatedRow.index
-          ? { ...row, ...editedData[updatedRow.index] }
-          : row
+        index === updatedRow.index ? { ...row, ...editedData[index] } : row
       );
       setData(updatedData);
       handleUpdateModalClose();
@@ -132,15 +132,30 @@ export const EditableTable = () => {
   };
 
   const handleBulkUpdate = async () => {
-    setUpdatedRows(Object.keys(editedData).map(Number));
+    const rowsToUpdate = Object.keys(editedData).filter(
+      (index) => Object.keys(editedData[index]).length > 0
+    );
+
+    if (rowsToUpdate.length === 0) {
+      console.error("Bulk update failed: No changes made");
+      return;
+    }
+
+    setUpdatedRows(rowsToUpdate.map(Number));
     setBulkUpdateModalOpen(true);
   };
 
   const handleConfirmedBulkUpdate = async () => {
-    if (!updatedRows.length) {
+    if (updatedRows.length === 0) {
       console.error("Bulk update failed: No rows to update");
       return;
     }
+
+    const bulkUpdateData = updatedRows.map((index) => ({
+      ...fetchedData[index],
+      ...editedData[index],
+    }));
+
     const response = await fetch(
       process.env.NEXT_PUBLIC_API_BULK_UPDATE_ENDPOINT,
       {
@@ -148,12 +163,12 @@ export const EditableTable = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(updatedRows),
+        body: JSON.stringify(bulkUpdateData),
       }
     );
 
     if (response.ok) {
-      const updatedData = fetchedData.map((row, index) =>
+      const updatedData = data.map((row, index) =>
         editedData[index] ? { ...row, ...editedData[index] } : row
       );
       setData(updatedData);
