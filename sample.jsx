@@ -1,5 +1,5 @@
 // hooks/useFetchData.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 export const useFetchData = () => {
   const [data, setData] = useState([]);
@@ -7,9 +7,9 @@ export const useFetchData = () => {
 
   useEffect(() => {
     fetch(process.env.NEXT_PUBLIC_API_ENDPOINT)
-      .then(response => response.json())
-      .then(data => setData(data))
-      .catch(error => setError(error.toString()));
+      .then((response) => response.json())
+      .then((data) => setData(data))
+      .catch((error) => setError(error.toString()));
   }, []);
 
   return { data, error };
@@ -17,24 +17,25 @@ export const useFetchData = () => {
 
 // constants/fieldNames.js
 export const FIELD_NAMES = {
-  PLANTADDRESS1: 'PLANTADDRESS1',
-  FRAME: 'FRAME',
-  PLANTNAME: 'PLANTNAME',
-  UNITNAME: 'UNITNAME',
-  SUBNAME: 'SUBNAME',
-  MACHINESN: 'MACHINESN',
-  CRM_PLANT_ID: 'CRM_PLANT_ID',
-  CRM_UNIT_ID: 'CRM_UNIT_ID'
+  PLANTADDRESS1: "PLANTADDRESS1",
+  FRAME: "FRAME",
+  PLANTNAME: "PLANTNAME",
+  UNITNAME: "UNITNAME",
+  SUBNAME: "SUBNAME",
+  MACHINESN: "MACHINESN",
+  CRM_PLANT_ID: "CRM_PLANT_ID",
+  CRM_UNIT_ID: "CRM_UNIT_ID",
 };
 
 // components/EditableTable.js
-import React, { useState, useEffect } from 'react';
-import { Table, Button, TextInput, Paper, Modal } from '@mantine/core';
-import { useFetchData } from '../hooks/useFetchData';
-import { FIELD_NAMES } from '../constants/fieldNames';
+import React, { useState, useEffect } from "react";
+import { Table, Button, TextInput, Paper, Modal } from "@mantine/core";
+import { useFetchData } from "../hooks/useFetchData";
+import { FIELD_NAMES } from "../constants/fieldNames";
 
 export const EditableTable = () => {
-  const { data, error } = useFetchData();
+  const { data: fetchedData, loading, error } = useFetchData();
+  const { data, setData } = useState([]);
   const [editedData, setEditedData] = useState({});
   const [filter, setFilter] = useState({});
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
@@ -44,7 +45,7 @@ export const EditableTable = () => {
 
   useEffect(() => {
     setEditedData({});
-  }, [data]);
+  }, [fetchedData]);
 
   const handleChange = (value, field, index) => {
     setEditedData({
@@ -66,17 +67,17 @@ export const EditableTable = () => {
     });
   };
 
-  const filteredData = data.filter(row =>
-      Object.keys(filter).every((key) => {
-        if (row[key] && filter[key]) {
-          const filterValue = filter[key].toLowerCase()
-          const cellValue = String(row[key]).toLowerCase()
-          return cellValue.includes(filterValue)
-        } else if (!filter[key]) {
-          return true
-        }
-        return false
-      })
+  const filteredData = fetchedData.filter((row) =>
+    Object.keys(filter).every((key) => {
+      if (row[key] && filter[key]) {
+        const filterValue = filter[key].toLowerCase();
+        const cellValue = String(row[key]).toLowerCase();
+        return cellValue.includes(filterValue);
+      } else if (!filter[key]) {
+        return true;
+      }
+      return false;
+    })
   );
 
   const handleUpdateModalClose = () => {
@@ -89,31 +90,37 @@ export const EditableTable = () => {
   };
 
   const handleUpdate = async (index) => {
-    setUpdatedRow({ ...data[index], ...editedData[index], index: index });
+    setUpdatedRow({
+      ...fetchedData[index],
+      ...editedData[index],
+      index: index,
+    });
     setUpdateModalOpen(true);
   };
 
   const handleConfirmedUpdate = async () => {
     if (!updatedRow) {
-      console.error('Update failed: No row to update');
+      console.error("Update failed: No row to update");
       return;
     }
     const response = await fetch(process.env.NEXT_PUBLIC_API_UPDATE_ENDPOINT, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(updatedRow),
     });
 
     if (response.ok) {
-      const updatedData = data.map((row, index) =>
-        index === updatedRow.index ? { ...row, ...editedData[updatedRow.index] } : row
+      const updatedData = fetchedData.map((row, index) =>
+        index === updatedRow.index
+          ? { ...row, ...editedData[updatedRow.index] }
+          : row
       );
       setData(updatedData);
       handleUpdateModalClose();
     } else {
-      console.error('Update failed: ' + response.statusText);
+      console.error("Update failed: " + response.statusText);
     }
   };
 
@@ -124,16 +131,19 @@ export const EditableTable = () => {
 
   const handleConfirmedBulkUpdate = async () => {
     if (!updatedRows.length) {
-      console.error('Bulk update failed: No rows to update');
+      console.error("Bulk update failed: No rows to update");
       return;
     }
-    const response = await fetch(process.env.NEXT_PUBLIC_API_BULK_UPDATE_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updatedRows),
-    });
+    const response = await fetch(
+      process.env.NEXT_PUBLIC_API_BULK_UPDATE_ENDPOINT,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedRows),
+      }
+    );
 
     if (response.ok) {
       const updatedData = data.map((row, index) =>
@@ -143,7 +153,7 @@ export const EditableTable = () => {
       setEditedData({});
       handleBulkUpdateModalClose();
     } else {
-      console.error('Bulk update failed: ' + response.statusText);
+      console.error("Bulk update failed: " + response.statusText);
     }
   };
 
@@ -165,7 +175,14 @@ export const EditableTable = () => {
           <tr>
             <th>
               {FIELD_NAMES.PLANTADDRESS1}
-              <TextInput onChange={(event) => handleFilterChange(event.target.value, FIELD_NAMES.PLANTADDRESS1)} />
+              <TextInput
+                onChange={(event) =>
+                  handleFilterChange(
+                    event.target.value,
+                    FIELD_NAMES.PLANTADDRESS1
+                  )
+                }
+              />
             </th>
             {/* ... その他のフィールド ... */}
           </tr>
@@ -175,8 +192,17 @@ export const EditableTable = () => {
             <tr key={index}>
               <td>
                 <TextInput
-                  value={editedData[index]?.[FIELD_NAMES.PLANTADDRESS1] || row[FIELD_NAMES.PLANTADDRESS1]}
-                  onChange={(event) => handleChange(event.target.value, FIELD_NAMES.PLANTADDRESS1, index)}
+                  value={
+                    editedData[index]?.[FIELD_NAMES.PLANTADDRESS1] ||
+                    row[FIELD_NAMES.PLANTADDRESS1]
+                  }
+                  onChange={(event) =>
+                    handleChange(
+                      event.target.value,
+                      FIELD_NAMES.PLANTADDRESS1,
+                      index
+                    )
+                  }
                 />
               </td>
               {/* ... その他のフィールド ... */}
