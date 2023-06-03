@@ -46,6 +46,7 @@ export const EditableTable = () => {
   useEffect(() => {
     setData(fetchedData);
     setEditedData({});
+    setUpdatedRows([]);
   }, [fetchedData]);
 
   const handleChange = (value, field, index) => {
@@ -152,6 +153,7 @@ export const EditableTable = () => {
       );
       setData(updatedData);
       setEditedData({});
+      setUpdatedRows([]); // ここでupdatedRowsを初期化
       handleBulkUpdateModalClose();
     } else {
       console.error("Bulk update failed: " + response.statusText);
