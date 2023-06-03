@@ -35,6 +35,10 @@ import { FIELD_NAMES } from "../../constants/fieldNames";
 
 const editableFields = [FIELD_NAMES.CRM_PLANT_ID, FIELD_NAMES.CRM_UNIT_ID];
 
+// components/EditableTable.js
+
+// ...import文
+
 export const EditableTable = () => {
   const { fetchedData, error } = useFetchData();
   const [data, setData] = useState([]);
@@ -48,7 +52,6 @@ export const EditableTable = () => {
   useEffect(() => {
     setData(fetchedData);
     setEditedData({});
-    setUpdatedRows([]);
   }, [fetchedData]);
 
   const handleChange = (value, field, index) => {
@@ -150,12 +153,11 @@ export const EditableTable = () => {
     );
 
     if (response.ok) {
-      const updatedData = data.map((row, index) =>
+      const updatedData = fetchedData.map((row, index) =>
         editedData[index] ? { ...row, ...editedData[index] } : row
       );
       setData(updatedData);
       setEditedData({});
-      setUpdatedRows([]); // ここでupdatedRowsを初期化
       handleBulkUpdateModalClose();
     } else {
       console.error("Bulk update failed: " + response.statusText);
@@ -168,7 +170,12 @@ export const EditableTable = () => {
 
   return (
     <>
-      <Button onClick={handleBulkUpdate}>Bulk Update</Button>
+      <Button
+        onClick={handleBulkUpdate}
+        disabled={!Object.keys(editedData).length}
+      >
+        Bulk Update
+      </Button>
       <Modal opened={updateModalOpen} onClose={handleUpdateModalClose}>
         <Button onClick={handleConfirmedUpdate}>Confirm Update</Button>
       </Modal>
@@ -195,22 +202,23 @@ export const EditableTable = () => {
             <tr key={index}>
               {Object.values(FIELD_NAMES).map((fieldName) => (
                 <td key={fieldName}>
-                  {editableFields.includes(fieldName) ? (
-                    <TextInput
-                      value={
-                        editedData[index]?.[fieldName] || row[fieldName] || ""
-                      }
-                      onChange={(event) =>
-                        handleChange(event.target.value, fieldName, index)
-                      }
-                    />
-                  ) : (
-                    <span>{row[fieldName]}</span>
-                  )}
+                  <TextInput
+                    value={
+                      editedData[index]?.[fieldName] || row[fieldName] || ""
+                    }
+                    onChange={(event) =>
+                      handleChange(event.target.value, fieldName, index)
+                    }
+                  />
                 </td>
               ))}
               <td>
-                <Button onClick={() => handleUpdate(index)}>Update</Button>
+                <Button
+                  onClick={() => handleUpdate(index)}
+                  disabled={!editedData[index]}
+                >
+                  Update
+                </Button>
               </td>
             </tr>
           ))}
@@ -220,7 +228,7 @@ export const EditableTable = () => {
         onClick={handleBulkUpdate}
         disabled={!Object.keys(editedData).length}
       >
-        Bulk update
+        Bulk Update
       </Button>
       <Modal opened={updateModalOpen} onClose={handleUpdateModalClose}>
         <Paper padding="md">
