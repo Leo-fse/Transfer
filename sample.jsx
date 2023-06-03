@@ -89,7 +89,7 @@ export const EditableTable = () => {
     if (updatedRow) {
       setUpdatedRow(null);
     }
-  }, [editedData]);
+  }, [editedData、updatedRow]);
 
   if (error) {
     return <p>Error: {error}</p>;
