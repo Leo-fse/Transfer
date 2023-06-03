@@ -10,7 +10,9 @@ export const EditableTable = () => {
   const [filter, setFilter] = useState({});
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [updatedRow, setUpdatedRow] = useState(null);
-
+  const isEditableCell = (field) => {
+    return field === FIELD_NAMES.CRM_PLANT_ID || field === FIELD_NAMES.CRM_UNIT_ID;
+  };
   useEffect(() => {
     setData(fetchedData);
     setEditedData({});
