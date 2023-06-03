@@ -33,6 +33,8 @@ import { Table, Button, TextInput, Paper, Modal } from "@mantine/core";
 import { useFetchData } from "../../hooks/useFetchData";
 import { FIELD_NAMES } from "../../constants/fieldNames";
 
+const editableFields = [FIELD_NAMES.CRM_PLANT_ID, FIELD_NAMES.CRM_UNIT_ID];
+
 export const EditableTable = () => {
   const { fetchedData, error } = useFetchData();
   const [data, setData] = useState([]);
@@ -193,14 +195,18 @@ export const EditableTable = () => {
             <tr key={index}>
               {Object.values(FIELD_NAMES).map((fieldName) => (
                 <td key={fieldName}>
-                  <TextInput
-                    value={
-                      editedData[index]?.[fieldName] || row[fieldName] || ""
-                    }
-                    onChange={(event) =>
-                      handleChange(event.target.value, fieldName, index)
-                    }
-                  />
+                  {editableFields.includes(fieldName) ? (
+                    <TextInput
+                      value={
+                        editedData[index]?.[fieldName] || row[fieldName] || ""
+                      }
+                      onChange={(event) =>
+                        handleChange(event.target.value, fieldName, index)
+                      }
+                    />
+                  ) : (
+                    <span>{row[fieldName]}</span>
+                  )}
                 </td>
               ))}
               <td>
