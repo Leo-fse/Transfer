@@ -18,10 +18,10 @@ export const EditableTable = () => {
   }, [fetchedData]);
 
   const handleChange = (value, field, index) => {
-    setEditedData({
-      ...editedData,
-      [index]: { ...editedData[index], [field]: value },
-    });
+    setEditedData((prevEditedData) => ({
+      ...prevEditedData,
+      [index]: { ...prevEditedData[index], [field]: value },
+    }));
   };
 
   const handleFilterChange = (value, field) => {
@@ -55,7 +55,7 @@ export const EditableTable = () => {
     setUpdatedRow(null);
   };
 
-  const handleUpdate = async (index) => {
+  const handleUpdate = (index) => {
     setUpdatedRow({
       ...fetchedData[index],
       ...editedData[index],
@@ -84,17 +84,17 @@ export const EditableTable = () => {
           : row
       );
       setData(updatedData);
-      handleUpdateModalClose(); // モーダルを閉じる
+      handleUpdateModalClose();
     } else {
       console.error("Update failed: " + response.statusText);
     }
   };
 
   useEffect(() => {
-    if (updatedRow) {
+    if (editedData && editedData[updatedRow?.index]) {
       setUpdatedRow(null);
     }
-  }, [editedData]);
+  }, [editedData, updatedRow]);
 
   if (error) {
     return <p>Error: {error}</p>;
@@ -135,7 +135,7 @@ export const EditableTable = () => {
               <td>
                 <Button
                   onClick={() => handleUpdate(index)}
-                  disabled={!updatedRow || updatedRow.index !== index} // 更新がある行のみボタンを有効にする
+                  disabled={updatedRow?.index !== index} // 更新がある行のみボタンを有効にする
                 >
                   Update
                 </Button>
@@ -154,4 +154,3 @@ export const EditableTable = () => {
     </>
   );
 };
-わ
