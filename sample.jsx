@@ -34,7 +34,7 @@ import { useFetchData } from "../hooks/useFetchData";
 import { FIELD_NAMES } from "../constants/fieldNames";
 
 export const EditableTable = () => {
-  const [fetchedData, error] = useFetchData();
+  const { fetchedData, error } = useFetchData();
   const [data, setData] = useState([]);
   const [editedData, setEditedData] = useState({});
   const [filter, setFilter] = useState({});
@@ -173,39 +173,31 @@ export const EditableTable = () => {
       <Table>
         <thead>
           <tr>
-            <th>
-              {FIELD_NAMES.PLANTADDRESS1}
-              <TextInput
-                onChange={(event) =>
-                  handleFilterChange(
-                    event.target.value,
-                    FIELD_NAMES.PLANTADDRESS1
-                  )
-                }
-              />
-            </th>
-            {/* ... その他のフィールド ... */}
+            {Object.values(FIELD_NAMES).map((fieldName) => (
+              <th key={fieldName}>
+                {fieldName}
+                <TextInput
+                  onChange={(event) =>
+                    handleFilterChange(event.target.value, fieldName)
+                  }
+                />
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
           {filteredData.map((row, index) => (
             <tr key={index}>
-              <td>
-                <TextInput
-                  value={
-                    editedData[index]?.[FIELD_NAMES.PLANTADDRESS1] ||
-                    row[FIELD_NAMES.PLANTADDRESS1]
-                  }
-                  onChange={(event) =>
-                    handleChange(
-                      event.target.value,
-                      FIELD_NAMES.PLANTADDRESS1,
-                      index
-                    )
-                  }
-                />
-              </td>
-              {/* ... その他のフィールド ... */}
+              {Object.values(FIELD_NAMES).map((fieldName) => (
+                <td key={fieldName}>
+                  <TextInput
+                    value={editedData[index]?.[fieldName] || row[fieldName]}
+                    onChange={(event) =>
+                      handleChange(event.target.value, fieldName, index)
+                    }
+                  />
+                </td>
+              ))}
               <td>
                 <Button onClick={() => handleUpdate(index)}>Update</Button>
               </td>
@@ -213,6 +205,26 @@ export const EditableTable = () => {
           ))}
         </tbody>
       </Table>
+      <Button
+        onClick={handleBulkUpdate}
+        disabled={!Object.keys(editedData).length}
+      >
+        Bulk update
+      </Button>
+      <Modal opened={updateModalOpen} onClose={handleUpdateModalClose}>
+        <Paper padding="md">
+          <h1>Update Confirmation</h1>
+          <p>Are you sure you want to update this row?</p>
+          <Button onClick={handleConfirmedUpdate}>Yes, update</Button>
+        </Paper>
+      </Modal>
+      <Modal opened={bulkUpdateModalOpen} onClose={handleBulkUpdateModalClose}>
+        <Paper padding="md">
+          <h1>Bulk Update Confirmation</h1>
+          <p>Are you sure you want to update these rows?</p>
+          <Button onClick={handleConfirmedBulkUpdate}>Yes, update</Button>
+        </Paper>
+      </Modal>
     </>
   );
 };
