@@ -44,6 +44,7 @@ export const EditableTable = () => {
   const [updatedRows, setUpdatedRows] = useState([]);
 
   useEffect(() => {
+    setData(fetchedData);
     setEditedData({});
   }, [fetchedData]);
 
@@ -125,7 +126,7 @@ export const EditableTable = () => {
   };
 
   const handleBulkUpdate = async () => {
-    setUpdatedRows(Object.values(editedData));
+    setUpdatedRows(Object.keys(editedData).map(Number));
     setBulkUpdateModalOpen(true);
   };
 
