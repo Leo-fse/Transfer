@@ -30,8 +30,8 @@ export const FIELD_NAMES = {
 // components/EditableTable.js
 import React, { useState, useEffect } from "react";
 import { Table, Button, TextInput, Paper, Modal } from "@mantine/core";
-import { useFetchData } from "../hooks/useFetchData";
-import { FIELD_NAMES } from "../constants/fieldNames";
+import { useFetchData } from "../../hooks/useFetchData";
+import { FIELD_NAMES } from "../../constants/fieldNames";
 
 export const EditableTable = () => {
   const { fetchedData, error } = useFetchData();
