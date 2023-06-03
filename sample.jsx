@@ -116,7 +116,10 @@ export const EditableTable = () => {
   </thead>
   <tbody>
     {filteredData.map((row, index) => (
-      <tr key={index}>
+      <tr 
+        key={index}
+        className={index % 2 === 0 ? 'bg-gray-200' : ''}
+      >
         {Object.values(FIELD_NAMES).map((fieldName) => (
           <td 
             key={fieldName} 
