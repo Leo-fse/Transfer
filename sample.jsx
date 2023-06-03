@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 
 export const useFetchData = () => {
-  const [data, setData] = useState([]);
+  const [fetcheddata, setFetchedData] = useState([]);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -12,7 +12,7 @@ export const useFetchData = () => {
       .catch((error) => setError(error.toString()));
   }, []);
 
-  return { data, error };
+  return { fetchedData, error };
 };
 
 // constants/fieldNames.js
@@ -34,8 +34,8 @@ import { useFetchData } from "../hooks/useFetchData";
 import { FIELD_NAMES } from "../constants/fieldNames";
 
 export const EditableTable = () => {
-  const { data: fetchedData, loading, error } = useFetchData();
-  const { data, setData } = useState([]);
+  const [fetchedData, error] = useFetchData();
+  const [data, setData] = useState([]);
   const [editedData, setEditedData] = useState({});
   const [filter, setFilter] = useState({});
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
