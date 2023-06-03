@@ -100,16 +100,24 @@ export const EditableTable = () => {
       <Table>
         <thead>
           <tr>
-            {Object.values(FIELD_NAMES).map((fieldName) => (
-              <th key={fieldName}>
-                {fieldName}
-                <TextInput
-                  onChange={(event) =>
-                    handleFilterChange(event.target.value, fieldName)
-                  }
-                />
-              </th>
-            ))}
+                   {Object.values(FIELD_NAMES).map((fieldName) => (
+  <td key={fieldName}>
+    {(fieldName === 'CRM_PLANT_ID' || fieldName === 'CRM_UNIT_ID') ? (
+      <TextInput
+        value={
+          editedData[index]?.[fieldName] || row[fieldName] || ""
+        }
+        onChange={(event) =>
+          handleChange(event.target.value, fieldName, index)
+        }
+      />
+    ) : (
+      <span>{row[fieldName] || ""}</span>
+    )}
+  </td>
+))}
+ 
+    
           </tr>
         </thead>
         <tbody>
