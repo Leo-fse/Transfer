@@ -95,13 +95,14 @@ export const EditableTable = () => {
 
   return (
     <>
+    
     <Table>
   <thead>
     <tr>
       {Object.values(FIELD_NAMES).map((fieldName) => (
         <th 
           key={fieldName} 
-          className="sticky top-0 bg-white z-10 border border-gray-300"
+          className="sticky top-0 bg-blue-200 z-10 border border-gray-300"
         >
           {fieldName}
           <TextInput
@@ -147,6 +148,8 @@ export const EditableTable = () => {
     ))}
   </tbody>
 </Table>
+
+    
 
       <Modal opened={updateModalOpen} onClose={handleUpdateModalClose}>
         <Paper padding="md">
