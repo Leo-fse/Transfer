@@ -64,18 +64,33 @@ export const EditableTable = () => {
     setUpdateModalOpen(true);
   };
 
-  const handleConfirmedUpdate = async () => {
-    if (!updatedRow) {
-      console.error("Update failed: No row to update");
-      return;
-    }
-    const response = await fetch(process.env.NEXT_PUBLIC_API_UPDATE_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedRow),
-    });
+const handleConfirmedUpdate = async () => {
+  if (!updatedRow) {
+    console.error("Update failed: No row to update");
+    return;
+  }
+  const response = await fetch(process.env.NEXT_PUBLIC_API_UPDATE_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(updatedRow),
+  });
+
+  if (response.ok) {
+    const updatedData = fetchedData.map((row, index) =>
+      index === updatedRow.index
+        ? { ...row, ...editedData[updatedRow.index] }
+        : row
+    );
+    setData(updatedData);
+  } else {
+    console.error("Update failed: " + response.statusText);
+  }
+
+  handleUpdateModalClose(); // モーダルを閉じる
+};
+
 
     if (response.ok) {
       const updatedData = fetchedData.map((row, index) =>
