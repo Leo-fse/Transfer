@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, TextInput, Paper, Modal } from '@mantine/core';
-import 'tailwindcss/tailwind.css';
 
-function EditableTable() {
+export const EditableTable() {
   const [data, setData] = useState([]);
   const [editedData, setEditedData] = useState({});
   const [filter, setFilter] = useState({});
@@ -30,16 +29,28 @@ function EditableTable() {
   };
 
   const handleFilterChange = (value, field) => {
-    setFilter({
-      ...filter,
-      [field]: value,
-    });
-  };
+    setFilter((prevFilter) => {
+      const newFilter = {
+        ...prevFilter,
+        [field]: value,
+      };
+      if (!value) {
+        delete newFilter[field]
+      }
+      return newFilter
+    })
 
   const filteredData = data.filter(row =>
-    Object.keys(filter).every(
-      key => !filter[key] || row[key].includes(filter[key])
-    )
+      Object.keys(filter).every((key) => {
+        if (row[key] && filter[key]) {
+          const filterValue = filter[key].toLowerCase()
+          const cellValue = String(row[key]).toLowerCase()
+          return cellValue.includes(filterValue)
+        } else if (!filter[key]) {
+          return true
+        }
+        return false
+      })
   );
 
   const handleUpdateModalClose = () => {
@@ -112,35 +123,35 @@ function EditableTable() {
           <tr>
             <th>
               PLANTADDRESS1
-              <TextInput onChange={(value) => handleFilterChange(value, 'plantAddress1')} />
+              <TextInput onChange={(event) => handleFilterChange(event.target.value, 'PLANTADDRESS1')} />
             </th>
             <th>
               FRAME
-              <TextInput onChange={(value) => handleFilterChange(value, 'frame')} />
+              <TextInput onChange={(event) => handleFilterChange(event.target.value, 'FRAME')} />
             </th>
             <th>
               PLANTNAME
-              <TextInput onChange={(value) => handleFilterChange(value, 'plantName')} />
+              <TextInput onChange={(event) => handleFilterChange(event.target.value, 'PLANTNAME')} />
             </th>
             <th>
               UNITNAME
-              <TextInput onChange={(value) => handleFilterChange(value, 'unitName')} />
+              <TextInput onChange={(event) => handleFilterChange(event.target.value, 'UNITNAME')} />
             </th>
             <th>
               SUBNAME
-              <TextInput onChange={(value) => handleFilterChange(value, 'subName')} />
+              <TextInput onChange={(event) => handleFilterChange(event.target.value, 'SUBNAME')} />
             </th>
             <th>
               MACHINESN
-              <TextInput onChange={(value) => handleFilterChange(value, 'machineSN')} />
+              <TextInput onChange={(event) => handleFilterChange(event.target.value, 'MACHINESN')} />
             </th>
             <th>
               CRM_PLANT_ID
-              <TextInput onChange={(value) => handleFilterChange(value, 'plantID')} />
+              <TextInput onChange={(event) => handleFilterChange(event.target.value, 'CRM_PLANT_ID')} />
             </th>
             <th>
               CRM_UNIT_ID
-              <TextInput onChange={(value) => handleFilterChange(value, 'unitID')} />
+              <TextInput onChange={(event) => handleFilterChange(event.target.value, 'CRM_UNIT_ID')} />
             </th>
             <th>
               Update
@@ -150,24 +161,24 @@ function EditableTable() {
         <tbody>
           {filteredData.map((row, index) => (
             <tr key={index} style={editedData[index] ? { backgroundColor: 'yellow' } : undefined}>
-              <td>{row.plantAddress1}</td>
-              <td>{row.frame}</td>
-              <td>{row.plantName}</td>
-              <td>{row.unitName}</td>
-              <td>{row.subName}</td>
-              <td>{row.machineSN}</td>
+              <td>{row.PLANTADDRESS1}</td>
+              <td>{row.FRAME}</td>
+              <td>{row.PLANTNAME}</td>
+              <td>{row.UNITNAME}</td>
+              <td>{row.SUBNAME}</td>
+              <td>{row.MACHINESN}</td>
               <td>
                 <TextInput 
-                  value={editedData[index]?.plantID ?? row.plantID ?? ''}
+                  value={editedData[index]?.CRM_PLANT_ID ?? row.CRM_PLANT_ID ?? ''}
                   maxLength={10}
-                  onChange={(value) => handleChange(value, 'plantID', index)}
+                  onChange={(value) => handleChange(value, 'CRM_PLANT_ID', index)}
                 />
               </td>
               <td>
                 <TextInput 
-                  value={editedData[index]?.unitID ?? row.unitID ?? ''}
+                  value={editedData[index]?.CRM_UNIT_ID ?? row.CRM_UNIT_ID ?? ''}
                   maxLength={10}
-                  onChange={(value) => handleChange(value, 'unitID', index)}
+                  onChange={(value) => handleChange(value, 'CRM_UNIT_ID', index)}
                 />
               </td>
               <td>
@@ -202,5 +213,3 @@ function EditableTable() {
     </>
   );
 }
-
-export default EditableTable;
